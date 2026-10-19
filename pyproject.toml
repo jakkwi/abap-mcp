@@ -1,0 +1,47 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "abap-mcp"
+version = "0.1.0"
+description = "MCP server that lets AI coding agents read, review and test ABAP code - no SAP system required."
+readme = "README.md"
+license = "MIT"
+authors = [{ name = "Jakub Kwiatkowski" }]
+requires-python = ">=3.11"
+dependencies = ["mcp>=2.0,<3"]
+keywords = ["abap", "sap", "mcp", "model-context-protocol", "llm", "ai-agents", "abapgit", "clean-abap"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Topic :: Software Development :: Quality Assurance",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "anyio>=4", "ruff>=0.6", "mypy>=1.11"]
+
+[project.scripts]
+abap-mcp = "abap_mcp.__main__:main"
+
+[project.urls]
+Repository = "https://github.com/jakkwi/abap-mcp"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/abap_mcp"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["node: needs Node.js and abaplint"]
+
+[tool.ruff]
+line-length = 120
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "RUF"]
+
+[tool.mypy]
+strict = true
+python_version = "3.11"
+mypy_path = "src"
