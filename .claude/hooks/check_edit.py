@@ -28,7 +28,11 @@ def committed_lines(p: Path) -> set[str]:
     try:
         rel = p.resolve().relative_to(Path.cwd().resolve()).as_posix()
         old = subprocess.run(
-            ["git", "show", f"HEAD:{rel}"], capture_output=True, text=True, encoding="utf-8"
+            ["git", "show", f"HEAD:{rel}"],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            check=False,
         )
         return set(old.stdout.splitlines()) if old.returncode == 0 else set()
     except (ValueError, OSError):
@@ -36,15 +40,10 @@ def committed_lines(p: Path) -> set[str]:
 
 
 old = committed_lines(path)
-bad = [
-    i + 1
-    for i, line in enumerate(text.splitlines())
-    if any(d in line for d in DASHES) and line not in old
-]
+bad = [i + 1 for i, line in enumerate(text.splitlines()) if any(d in line for d in DASHES) and line not in old]
 if bad:
     print(
-        f"{path}: long dash on new line(s) {bad}. "
-        "Use a comma, colon, parentheses or a plain hyphen.",
+        f"{path}: long dash on new line(s) {bad}. Use a comma, colon, parentheses or a plain hyphen.",
         file=sys.stderr,
     )
     sys.exit(2)
