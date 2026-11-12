@@ -11,3 +11,7 @@ node_modules/
 .DS_Store
 .idea/
 .vscode/
+
+# Claude Code personal files
+CLAUDE.local.md
+.claude/settings.local.json
