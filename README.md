@@ -101,7 +101,23 @@ abap-mcp --root /srv/abap --http --host 0.0.0.0 --port 8000   # endpoint: /mcp
 docker build -t abap-mcp . && docker run -p 8000:8000 -v "$PWD:/workspace" abap-mcp
 ```
 
+The server has no authentication of its own: bind it to `0.0.0.0` only on a network you trust.
+
+The Docker image includes Node.js and abaplint, so `lint` and `run_tests` work inside it. It serves HTTP on port 8000 with the mounted folder as the workspace root.
+
+### Configuration
+
+| Setting | Default | Effect |
+| --- | --- | --- |
+| `--root DIR` | `$ABAP_MCP_ROOT`, else the current directory | Workspace root. Tool paths must stay inside it. |
+| `--http` | off (stdio) | Serve Streamable HTTP instead of stdio |
+| `--host`, `--port` | `127.0.0.1`, `8000` | HTTP bind address |
+| `ABAP_MCP_TIMEOUT` | `180` | abaplint timeout in seconds; each npm step gets three times this |
+| `ABAP_MCP_ABAPLINT` | unset | Command used to run abaplint. Otherwise `abaplint` on `PATH`, then `npx --yes @abaplint/cli@2` |
+
 ## How it works
+
+The full picture (modules, request flow, external tools) is in [docs/architecture.md](docs/architecture.md).
 
 ```mermaid
 flowchart LR
@@ -136,6 +152,23 @@ mypy src            # strict
 ```
 
 The tests drive the server through a real MCP client, the same way an agent does.
+
+## Project layout
+
+| Path | Contents |
+| --- | --- |
+| `src/abap_mcp/` | The package: `server.py` (MCP tools), `workspace.py`, `source.py`, `outline.py`, `rules.py`, `tooling.py`, `__main__.py` (CLI) |
+| `tests/` | pytest suite; `tests/fixtures/shop/` is a small abapGit project used as test input |
+| `docs/` | [Architecture](docs/architecture.md) and [decision records](docs/adr/README.md) |
+| `Dockerfile` | Image with Python, Node.js and abaplint, serving HTTP on port 8000 |
+| `.github/workflows/ci.yml` | Lint, type check, tests on Python 3.11 to 3.13, Docker build |
+
+## Documentation
+
+| Doc | What it covers |
+| --- | --- |
+| [docs/architecture.md](docs/architecture.md) | Modules, how a tool call flows through them, Node.js tooling, configuration, external contracts |
+| [docs/adr/](docs/adr/README.md) | Why the code works on abapGit files, has its own Python rules, and runs Node.js tools as optional subprocesses |
 
 ## Roadmap
 
